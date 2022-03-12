@@ -82,7 +82,7 @@ function Game(props: GameProps) {
         (guess + key.toLowerCase()).slice(0, wordLength)
       );
 	  if ((currentGuess.length + 1) >= wordLength && !dictionary.includes(currentGuess + key.toLowerCase())) {
-        setHint("Sijui neno. Tumia backspace (⌫) ili kuondoa herufi kutoka kwa neno.");
+        setHint("Sijui neno. Unaweza kuliondoa kwa kutumia kibonyeo (⌫).");
         return;
       }
       setHint("");
