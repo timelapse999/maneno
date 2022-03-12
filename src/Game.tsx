@@ -1,0 +1,255 @@
+import { useEffect, useRef, useState } from "react";
+import { Row, RowState } from "./Row";
+import dictionary from "./dictionaryCombined.json";
+import { Clue, clue, describeClue, getStringDefinitionLink } from "./clue";
+import { Keyboard } from "./Keyboard";
+import targetList from "./targetWords.json";
+import { 
+	dictionarySet, 
+	pick, 
+	resetRng, 
+	seed, 
+	speak,
+	urlParam,
+} from "./util";
+
+enum GameState {
+  Playing,
+  Won,
+  Lost,
+}
+
+interface GameProps {
+  maxGuesses: number;
+  hidden: boolean;
+  colorBlind: boolean;
+}
+
+const targets = targetList.slice(0, targetList.indexOf("zuumu") + 1); // Words no rarer than this one
+const minWordLength = 3;
+const maxWordLength = 5;
+
+function randomTarget(wordLength: number) {
+  const eligible = targets.filter((word) => word.length === wordLength);
+  return pick(eligible);
+}
+
+function calculateDuration(wordLength: number): number {
+  const computedStyle = getComputedStyle(document.documentElement)
+  const flipDuration = computedStyle.getPropertyValue('--letter-flip-duration');
+  const rowOffset = computedStyle.getPropertyValue('--animation-row-offset');
+
+  return (wordLength - 1) * parseInt(rowOffset) + parseInt(flipDuration);
+}
+
+function Game(props: GameProps) {
+  const [gameState, setGameState] = useState(GameState.Playing);
+  const [guesses, setGuesses] = useState<string[]>([]);
+  const [currentGuess, setCurrentGuess] = useState<string>("");
+  const [wordLength, setWordLength] = useState(3);
+    const [hint, setHint] = useState<string | JSX.Element>(`Toa nadhani yako ya kwanza!`);
+  const [srStatus, setSrStatus] = useState<string>(``);
+  const [target, setTarget] = useState(() => {
+    resetRng();
+    return randomTarget(wordLength);
+  });
+  const [timeBetweenGuesses, setTimeBetweenGuesses] = useState(() => {
+    return calculateDuration(wordLength);
+  });
+  const [gameNumber, setGameNumber] = useState(1);
+  const [keyboardDisabled, setKeyboardDisabled] = useState(false);
+
+  const startNextGame = () => {
+    setTarget(randomTarget(wordLength));
+	setTimeBetweenGuesses(calculateDuration(wordLength));
+    setGuesses([]);
+    setCurrentGuess("");
+    setHint("");
+    setGameState(GameState.Playing);
+    setGameNumber((x) => x + 1);
+  };
+
+  const onKey = (key: string) => {
+    if (gameState !== GameState.Playing) {
+      if (key === "Enter") {
+        startNextGame();
+      }
+      return;
+    }
+    if (guesses.length === props.maxGuesses) return;
+    if (/^[a-zäö]$/i.test(key)) {
+      setCurrentGuess((guess) =>
+        (guess + key.toLowerCase()).slice(0, wordLength)
+      );
+	  if ((currentGuess.length + 1) >= wordLength && !dictionary.includes(currentGuess + key.toLowerCase())) {
+        setHint("Sijui neno. Tumia backspace (⌫) ili kuondoa herufi kutoka kwa neno.");
+        return;
+      }
+      setHint("");
+      setSrStatus("");
+    } else if (key === "Backspace") {
+      setCurrentGuess((guess) => guess.slice(0, -1));
+      setHint("");
+    } else if (key === "Enter") {
+      if (currentGuess.length !== wordLength) {
+        setHint("Neno ni fupi mno");
+        return;
+      }
+      if (!dictionary.includes(currentGuess)) {
+        setHint("Sijui neno");
+        return;
+      }
+	  setKeyboardDisabled(true);
+      setTimeout(() => setKeyboardDisabled(false), timeBetweenGuesses);
+      setGuesses((guesses) => guesses.concat([currentGuess]));
+      setCurrentGuess((guess) => "");
+      if (currentGuess === target) {
+        setHint(
+		  <>
+                Umefaulu! Neno ni 
+                  <a 
+                    className="target-word" 
+                    href={getStringDefinitionLink(target)} 
+                    target="_blank"
+                  >
+                    {target.toUpperCase()}
+                  </a>
+                . (Bonyeza ENTER kwa kucheza upya)
+              </>
+		
+        );
+        setGameState(GameState.Won);
+      } else if (guesses.length + 1 === props.maxGuesses) {
+        setHint(
+		  <>
+                Oh hapana! Jibu ni 
+                  <a 
+                    className="target-word" 
+                    href={getStringDefinitionLink(target)} 
+                    target="_blank"
+                  >
+                    {target.toUpperCase()}
+                  </a>
+                . (Bonyeza ENTER kwa kucheza upya)
+              </>
+		
+        );
+        setGameState(GameState.Lost);
+      } else {
+        setHint("");
+        speak(describeClue(clue(currentGuess, target)));
+      }
+    }
+  };
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!e.ctrlKey && !e.metaKey) {
+        onKey(e.key);
+      }
+      if (e.key === "Backspace") {
+        e.preventDefault();
+      }
+    };
+    if (!keyboardDisabled) {
+      document.addEventListener("keydown", onKeyDown);
+    }
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [currentGuess, gameState, keyboardDisabled]);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--keyboard-transition-delay', timeBetweenGuesses + "ms");
+  }, [timeBetweenGuesses])
+
+  let letterInfo = new Map<string, Clue>();
+  const tableRows = Array(props.maxGuesses)
+    .fill(undefined)
+    .map((_, i) => {
+      const guess = [...guesses, currentGuess][i] ?? "";
+      const cluedLetters = clue(guess, target);
+      const lockedIn = i < guesses.length;
+      if (lockedIn) {
+        for (const { clue, letter } of cluedLetters) {
+          if (clue === undefined) break;
+          const old = letterInfo.get(letter);
+          if (old === undefined || clue > old) {
+            letterInfo.set(letter, clue);
+          }
+        }
+      }
+      return (
+        <Row
+          key={i}
+          wordLength={wordLength}
+          rowState={
+            lockedIn
+              ? RowState.LockedIn
+              : i === guesses.length
+              ? RowState.Editing
+              : RowState.Pending
+          }
+          cluedLetters={cluedLetters}
+        />
+      );
+    });
+
+  return (
+    <div className="Game" style={{ display: props.hidden ? "none" : "block" }}>
+      <div className="Game-options">
+        <label htmlFor="wordLength">Urefu wa neno:</label>
+        <input
+          type="range"
+          min={minWordLength}
+          max={maxWordLength}
+          id="wordLength"
+          disabled={
+            gameState === GameState.Playing &&
+            (guesses.length > 0 || currentGuess !== "")
+          }
+          value={wordLength}
+          onChange={(e) => {
+            const length = Number(e.target.value);
+            resetRng();
+            setGameNumber(1);
+            setGameState(GameState.Playing);
+            setGuesses([]);
+            setCurrentGuess("");
+            setTarget(randomTarget(length));
+            setWordLength(length);
+            setHint(`herufi ${length}`);
+          }}
+        ></input>
+        <button
+          style={{ flex: "0 0 auto" }}
+          disabled={gameState !== GameState.Playing || guesses.length === 0}
+          onClick={() => {
+            setHint(
+              `Jibu ni ${target.toUpperCase()}. (Bonyeza ENTER kwa kucheza upya)`
+            );
+            setGameState(GameState.Lost);
+            (document.activeElement as HTMLElement)?.blur();
+          }}
+        >
+          Acha
+        </button>
+      </div>
+      <table className="Game-rows" tabIndex={0} aria-label="Table of guesses">
+        <tbody>{tableRows}</tbody>
+      </table>
+      <p role="alert">{hint || `\u00a0`}</p>
+      {/* <p role="alert" className="Game-sr-feedback">
+        {srStatus}
+      </p> */}
+      <Keyboard letterInfo={letterInfo} onKey={onKey} disabled={keyboardDisabled} />
+      {seed ? (
+        <div className="Game-seed-info">
+          seed {seed}, length {wordLength}, game {gameNumber}
+        </div>
+      ) : undefined}
+    </div>
+  );
+}
+
+export default Game;
