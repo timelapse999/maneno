@@ -106,7 +106,7 @@ function Game(props: GameProps) {
       if (currentGuess === target) {
         setHint(
 		  <>
-                Umefaulu! Neno ni 
+                Umefaulu! Neno ni&nbsp;
                   <a 
                     className="target-word" 
                     href={getStringDefinitionLink(target)} 
@@ -122,7 +122,7 @@ function Game(props: GameProps) {
       } else if (guesses.length + 1 === props.maxGuesses) {
         setHint(
 		  <>
-                Oh hapana! Jibu ni 
+                Oh hapana! Jibu ni&nbsp;
                   <a 
                     className="target-word" 
                     href={getStringDefinitionLink(target)} 
