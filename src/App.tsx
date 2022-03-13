@@ -119,7 +119,7 @@ function About() {
 	  <p>Maneno ya mchezo huu yanatokana na kichanganuzi cha kimofolojia ya Kiswahili, kilichotungwa na SALAMA.</p>
 	  <p>
 		Unaweza kupeleka maoni yako hapa:{" "}
-		<a href="mailto:maneno2022@gmail.com">maneno2022@gmail.com</a>
+		<a href="mailto:maneno2023@gmail.com">maneno2023@gmail.com</a>
 	  </p>
 	  <p>
         Msimbo wa asili wa Maneno unapatikana {" "}
