@@ -112,7 +112,7 @@ function About() {
       
 	  <p>
 		<strong>Mchezo Maneno umetungwa na:</strong><br />
-		Arvo Hurskainen, Juho Jouhtim&auml;ki
+		Arvi Hurskainen, Juho Jouhtim&auml;ki
 	  </p>
 	  <p>Msimbo uliotumiwa katika mchezu huu Maneno umetungwa kwa kutumia msimbo wa asili wazi.<br />Msimbo wa asili utapatikana hapa:<br />
 	  <a href="https://github.com/lynn/hello-wordl" target="_blank">https://github.com/lynn/hello-wordl</a></p>
@@ -190,12 +190,12 @@ function App() {
       <div style={{ position: "absolute", right: 5, top: 5 }}>
         {page !== "game" ? (
 		  <div className="closeButtonAnimation">
-			{link(element_close, "Sulje", "game")}
+			{link(element_close, "Funga", "game")}
 		  </div>
         ) : (
           <>
-            {link(element_info, "Tietoja", "about")}
-            {link(element_settings, "Asetukset", "settings")}
+            {link(element_info, "Kuhusu", "about")}
+            {link(element_settings, "Mipangilio ", "settings")}
           </>
         )}
       </div>
