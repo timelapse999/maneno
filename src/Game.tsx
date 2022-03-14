@@ -47,7 +47,7 @@ function Game(props: GameProps) {
   const [guesses, setGuesses] = useState<string[]>([]);
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [wordLength, setWordLength] = useState(3);
-    const [hint, setHint] = useState<string | JSX.Element>(`Toa nadhani yako ya kwanza!`);
+    const [hint, setHint] = useState<string | JSX.Element>(`Toa kisio lako la kwanza!`);
   const [srStatus, setSrStatus] = useState<string>(``);
   const [target, setTarget] = useState(() => {
     resetRng();

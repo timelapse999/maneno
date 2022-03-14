@@ -194,7 +194,7 @@ function App() {
 		  </div>
         ) : (
           <>
-            {link(element_info, "Kuhusu", "about")}
+            {link(element_info, "Taarifa", "about")}
             {link(element_settings, "Mipangilio ", "settings")}
           </>
         )}
