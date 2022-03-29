@@ -25,7 +25,7 @@ interface GameProps {
   colorBlind: boolean;
 }
 
-const targets = targetList.slice(0, targetList.indexOf("zuumu") + 1); // Words no rarer than this one
+const targets = targetList.slice(0, targetList.indexOf("zulia") + 1); // Words no rarer than this one
 const minWordLength = 3;
 const maxWordLength = 5;
 
