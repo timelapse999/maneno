@@ -101,11 +101,11 @@ function About() {
 	  </p>
 	  
 	  <ol className="leftAlign">
-	  <li>Maneno yaliyo na herufi tatu. Pia maneno yaliyonyambuliwa yamo. Mifano: leo, nia, afa, aua (maneno 328).</li>
+	  <li>Maneno yaliyo na herufi tatu. Pia maneno yaliyonyambuliwa yamo. Mifano: leo, nia, afa, aua (maneno 231).</li>
 
-      <li>Maneno yaliyo na herufi nne. Pia maneno yaliyonyambuliwa yamo. Mifano: zuri, afya, afie, hafi, (maneno 2510).</li>
+      <li>Maneno yaliyo na herufi nne. Pia maneno yaliyonyambuliwa yamo. Mifano: zuri, afya, afie, hafi, (maneno 1458).</li>
 
-      <li>Maneno yaliyo na herufi tano. Pia maneno yaliyonyambuliwa yamo. Mifano: chozi, elimu, abidi, hampi, (maneno 7546).</li>
+      <li>Maneno yaliyo na herufi tano. Pia maneno yaliyonyambuliwa yamo. Mifano: chozi, elimu, abidi, hampi, (maneno 3219).</li>
 	  </ol>
 	  
 	  <p>Majina ya watu na mahali yameondolewa.</p>
